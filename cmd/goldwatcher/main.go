@@ -2,7 +2,7 @@ package main
 
 import (
 	"fyne.io/fyne/v2/app"
-	"github.com/zivlakmilos/goldwatcher/gui"
+	"github.com/zivlakmilos/goldwatcher/private/gui"
 )
 
 func main() {

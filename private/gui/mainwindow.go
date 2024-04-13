@@ -22,10 +22,16 @@ func NewMainWindow(app fyne.App) *MainWindow {
 		errorLog: log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
 	}
 
+	w.setupUI()
+
 	return w
 }
 
 func (w *MainWindow) Show() {
+	w.win.Resize(fyne.NewSize(300, 200))
+	w.win.SetFixedSize(true)
+	w.win.SetMaster()
+
 	w.win.Show()
 }
 
