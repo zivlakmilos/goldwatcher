@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"net/http"
 	"os"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 	"github.com/zivlakmilos/goldwatcher/private/api"
 )
 
@@ -18,14 +21,17 @@ type MainWindow struct {
 	infoLog        *log.Logger
 	errorLog       *log.Logger
 	priceContainer *fyne.Container
+	httpClient     *http.Client
+	toolBar        *widget.Toolbar
 }
 
 func NewMainWindow(app fyne.App) *MainWindow {
 	w := &MainWindow{
-		app:      app,
-		win:      app.NewWindow("GoldWatcher"),
-		infoLog:  log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
-		errorLog: log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
+		app:        app,
+		win:        app.NewWindow("GoldWatcher"),
+		infoLog:    log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
+		errorLog:   log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
+		httpClient: &http.Client{},
 	}
 
 	w.setupUI()
@@ -51,13 +57,18 @@ func (w *MainWindow) setupUI() {
 	)
 	w.priceContainer = priceContainer
 
-	finalContent := container.NewVBox(priceContainer)
+	toolBar := w.setupToolBar()
+	w.toolBar = toolBar
+
+	finalContent := container.NewVBox(priceContainer, toolBar)
 	w.win.SetContent(finalContent)
 }
 
 func (w *MainWindow) getPriceText() (*canvas.Text, *canvas.Text, *canvas.Text) {
 	var g api.Gold
 	var open, current, change *canvas.Text
+
+	g.Client = w.httpClient
 
 	gold, err := g.GetPrices()
 	if err != nil {
@@ -72,9 +83,9 @@ func (w *MainWindow) getPriceText() (*canvas.Text, *canvas.Text, *canvas.Text) {
 			displayColor = color.NRGBA{R: 180, G: 0, B: 0, A: 255}
 		}
 
-		open = canvas.NewText(fmt.Sprintf("Open: $%.4f", gold.PreviousClose), nil)
-		current = canvas.NewText(fmt.Sprintf("Current: $%.4f", gold.PreviousClose), displayColor)
-		change = canvas.NewText(fmt.Sprintf("Change: $%.4f", gold.Change), displayColor)
+		open = canvas.NewText(fmt.Sprintf("Open: $%.4f %s", gold.PreviousClose, api.Currency), nil)
+		current = canvas.NewText(fmt.Sprintf("Current: $%.4f %s", gold.PreviousClose, api.Currency), displayColor)
+		change = canvas.NewText(fmt.Sprintf("Change: $%.4f %s", gold.Change, api.Currency), displayColor)
 	}
 
 	open.Alignment = fyne.TextAlignLeading
@@ -82,4 +93,15 @@ func (w *MainWindow) getPriceText() (*canvas.Text, *canvas.Text, *canvas.Text) {
 	change.Alignment = fyne.TextAlignTrailing
 
 	return open, current, change
+}
+
+func (w *MainWindow) setupToolBar() *widget.Toolbar {
+	toolBar := widget.NewToolbar(
+		widget.NewToolbarSpacer(),
+		widget.NewToolbarAction(theme.DocumentCreateIcon(), func() {}),
+		widget.NewToolbarAction(theme.ViewRefreshIcon(), func() {}),
+		widget.NewToolbarAction(theme.SettingsIcon(), func() {}),
+	)
+
+	return toolBar
 }

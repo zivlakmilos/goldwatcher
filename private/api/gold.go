@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var currency = "USD"
+var Currency = "USD"
 
 type Gold struct {
 	Prices []Price `json:"items"`
@@ -31,7 +31,7 @@ func (g *Gold) GetPrices() (*Price, error) {
 
 	client := g.Client
 
-	url := fmt.Sprintf("https://data-asg.goldprice.org/dbXRates/%s", currency)
+	url := fmt.Sprintf("https://data-asg.goldprice.org/dbXRates/%s", Currency)
 
 	req, _ := http.NewRequest("GET", url, nil)
 
