@@ -60,7 +60,13 @@ func (w *MainWindow) setupUI() {
 	toolBar := w.setupToolBar()
 	w.toolBar = toolBar
 
-	finalContent := container.NewVBox(priceContainer, toolBar)
+	tabs := container.NewAppTabs(
+		container.NewTabItemWithIcon("Prices", theme.HomeIcon(), canvas.NewText("Price contet goes here", nil)),
+		container.NewTabItemWithIcon("Holdings", theme.InfoIcon(), canvas.NewText("Holdings contet goes here", nil)),
+	)
+	tabs.SetTabLocation(container.TabLocationTop)
+
+	finalContent := container.NewVBox(priceContainer, toolBar, tabs)
 	w.win.SetContent(finalContent)
 }
 
