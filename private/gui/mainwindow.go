@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -77,6 +78,12 @@ func (w *MainWindow) setupUI() {
 
 	finalContent := container.NewVBox(priceContainer, toolBar, tabs)
 	w.win.SetContent(finalContent)
+
+	go func() {
+		for range time.Tick(time.Second * 5) {
+			w.refreshPriceContent()
+		}
+	}()
 }
 
 func (w *MainWindow) getPriceText() (*canvas.Text, *canvas.Text, *canvas.Text) {
@@ -114,7 +121,9 @@ func (w *MainWindow) setupToolBar() *widget.Toolbar {
 	toolBar := widget.NewToolbar(
 		widget.NewToolbarSpacer(),
 		widget.NewToolbarAction(theme.DocumentCreateIcon(), func() {}),
-		widget.NewToolbarAction(theme.ViewRefreshIcon(), func() {}),
+		widget.NewToolbarAction(theme.ViewRefreshIcon(), func() {
+			w.refreshPriceContent()
+		}),
 		widget.NewToolbarAction(theme.SettingsIcon(), func() {}),
 	)
 
@@ -176,4 +185,16 @@ func (w *MainWindow) downloadFile(url, fileName string) error {
 	}
 
 	return nil
+}
+
+func (w *MainWindow) refreshPriceContent() {
+	w.infoLog.Print("refreshing prices")
+
+	open, current, change := w.getPriceText()
+	w.priceContainer.Objects = []fyne.CanvasObject{open, current, change}
+	w.priceContainer.Refresh()
+
+	chart := w.getChart()
+	w.priceChartContainer.Objects = []fyne.CanvasObject{chart}
+	w.priceChartContainer.Refresh()
 }
