@@ -29,7 +29,7 @@ func (r *SQLiteRepository) Migrate() error {
 }
 
 func (r *SQLiteRepository) InsertHolding(h Holdings) (*Holdings, error) {
-	stmt := "insert into holdings (amount, purchase_date, purchase_price) value (?, ?, ?)"
+	stmt := "insert into holdings (amount, purchase_date, purchase_price) values (?, ?, ?)"
 
 	res, err := r.Conn.Exec(stmt, h.Amount, h.PurchaseDate.Unix(), h.PurchasePrice)
 	if err != nil {
@@ -101,7 +101,7 @@ func (r *SQLiteRepository) UpdateHolding(id int64, updated Holdings) error {
 	}
 
 	stmt := "update holdings set amount = ?, purchase_date = ?, purchase_price = ? where id = ?"
-	res, err := r.Conn.Exec(stmt, updated.Amount, updated.PurchaseDate.Unix(), updated.PurchasePrice)
+	res, err := r.Conn.Exec(stmt, updated.Amount, updated.PurchaseDate.Unix(), updated.PurchasePrice, id)
 	if err != nil {
 		return err
 	}
