@@ -19,6 +19,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/zivlakmilos/goldwatcher/private/api"
+	"github.com/zivlakmilos/goldwatcher/private/repository"
 	"github.com/zivlakmilos/goldwatcher/resources"
 )
 
@@ -31,15 +32,17 @@ type MainWindow struct {
 	httpClient          *http.Client
 	toolBar             *widget.Toolbar
 	priceChartContainer *fyne.Container
+	db                  repository.Repository
 }
 
-func NewMainWindow(app fyne.App) *MainWindow {
+func NewMainWindow(app fyne.App, repo repository.Repository) *MainWindow {
 	w := &MainWindow{
 		app:        app,
 		win:        app.NewWindow("GoldWatcher"),
 		infoLog:    log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
 		errorLog:   log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
 		httpClient: &http.Client{},
+		db:         repo,
 	}
 
 	w.setupUI()

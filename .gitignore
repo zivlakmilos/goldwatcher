@@ -21,3 +21,5 @@
 go.work
 
 testdata/
+
+gold.png
