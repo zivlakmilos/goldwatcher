@@ -23,3 +23,5 @@ go.work
 testdata/
 
 gold.png
+
+bin/
