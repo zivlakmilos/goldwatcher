@@ -14,7 +14,8 @@ var testMainWindow MainWindow
 
 func TestMain(m *testing.M) {
 	a := test.NewApp()
-	testMainWindow = *NewMainWindow(a)
+
+	testMainWindow = *NewMainWindow(a, nil)
 	testMainWindow.httpClient = client
 	os.Exit(m.Run())
 }
