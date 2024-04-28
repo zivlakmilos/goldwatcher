@@ -10,12 +10,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/zivlakmilos/goldwatcher/private/api"
@@ -33,6 +35,8 @@ type MainWindow struct {
 	toolBar             *widget.Toolbar
 	priceChartContainer *fyne.Container
 	db                  repository.Repository
+	holdings            [][]interface{}
+	holdingsTable       *widget.Table
 }
 
 func NewMainWindow(app fyne.App, repo repository.Repository) *MainWindow {
@@ -72,10 +76,11 @@ func (w *MainWindow) setupUI() {
 	w.toolBar = toolBar
 
 	priceTabContent := w.setupPricesTab()
+	holdingsTabContent := w.setupHoldingsTab()
 
 	tabs := container.NewAppTabs(
 		container.NewTabItemWithIcon("Prices", theme.HomeIcon(), priceTabContent),
-		container.NewTabItemWithIcon("Holdings", theme.InfoIcon(), canvas.NewText("Holdings contet goes here", nil)),
+		container.NewTabItemWithIcon("Holdings", theme.InfoIcon(), holdingsTabContent),
 	)
 	tabs.SetTabLocation(container.TabLocationTop)
 
@@ -203,7 +208,56 @@ func (w *MainWindow) refreshPriceContent() {
 }
 
 func (w *MainWindow) setupHoldingsTab() *fyne.Container {
-	return nil
+	w.holdingsTable = w.getHoldingsTable()
+
+	holdingsContainer := container.NewVBox(w.holdingsTable)
+
+	return holdingsContainer
+}
+
+func (w *MainWindow) getHoldingsTable() *widget.Table {
+	data := w.getHoldingSlice()
+	w.holdings = data
+
+	t := widget.NewTable(func() (int, int) {
+		return len(data), len(data[0])
+	},
+		func() fyne.CanvasObject {
+			ctr := container.NewVBox(widget.NewLabel(""))
+			return ctr
+		},
+		func(i widget.TableCellID, o fyne.CanvasObject) {
+			if i.Col == len(data[0])-1 && i.Row != 0 {
+				w := widget.NewButtonWithIcon("Delete", theme.DeleteIcon(), func() {
+					dialog.ShowConfirm("Delete?", "", func(deleted bool) {
+						id, _ := strconv.Atoi(data[i.Row][0].(string))
+						err := w.db.DeleteHolding(int64(id))
+						if err != nil {
+							w.errorLog.Println(err)
+						}
+
+						w.refreshHoldingsTable()
+					}, w.win)
+				})
+
+				w.Importance = widget.HighImportance
+
+				o.(*fyne.Container).Objects = []fyne.CanvasObject{
+					w,
+				}
+			} else {
+				o.(*fyne.Container).Objects = []fyne.CanvasObject{
+					widget.NewLabel((data[i.Row][i.Col]).(string)),
+				}
+			}
+		})
+
+	colWidths := []float32{50, 200, 200, 200, 110}
+	for idx, width := range colWidths {
+		t.SetColumnWidth(idx, width)
+	}
+
+	return t
 }
 
 func (w *MainWindow) getHoldingSlice() [][]interface{} {
@@ -231,6 +285,7 @@ func (w *MainWindow) getHoldingSlice() [][]interface{} {
 	return slice
 }
 
-func (w *MainWindow) getHoldingsTable() *widget.Table {
-	return nil
+func (w *MainWindow) refreshHoldingsTable() {
+	w.holdings = w.getHoldingSlice()
+	w.holdingsTable.Refresh()
 }
