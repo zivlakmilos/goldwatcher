@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"fyne.io/fyne/v2/test"
+	"github.com/zivlakmilos/goldwatcher/private/repository"
 )
 
 var testMainWindow MainWindow
@@ -15,7 +16,7 @@ var testMainWindow MainWindow
 func TestMain(m *testing.M) {
 	a := test.NewApp()
 
-	testMainWindow = *NewMainWindow(a, nil)
+	testMainWindow = *NewMainWindow(a, repository.NewTestRepository())
 	testMainWindow.httpClient = client
 	os.Exit(m.Run())
 }
