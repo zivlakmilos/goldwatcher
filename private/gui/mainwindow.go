@@ -201,3 +201,36 @@ func (w *MainWindow) refreshPriceContent() {
 	w.priceChartContainer.Objects = []fyne.CanvasObject{chart}
 	w.priceChartContainer.Refresh()
 }
+
+func (w *MainWindow) setupHoldingsTab() *fyne.Container {
+	return nil
+}
+
+func (w *MainWindow) getHoldingSlice() [][]interface{} {
+	var slice [][]interface{}
+
+	holdings, err := w.db.AllHoldings()
+	if err != nil {
+		w.errorLog.Println(err)
+	}
+
+	slice = append(slice, []interface{}{"ID", "Amount", "Price", "Data", "Delete?"})
+
+	for _, x := range holdings {
+		var row []interface{}
+
+		row = append(row, fmt.Sprintf("%d", x.Id))
+		row = append(row, fmt.Sprintf("%d toz", x.Amount))
+		row = append(row, fmt.Sprintf("$%2f", float32(x.PurchasePrice/100)))
+		row = append(row, x.PurchaseDate.Format("2006-01-02"))
+		row = append(row, widget.NewButton("Delete", func() {}))
+
+		slice = append(slice, row)
+	}
+
+	return slice
+}
+
+func (w *MainWindow) getHoldingsTable() *widget.Table {
+	return nil
+}

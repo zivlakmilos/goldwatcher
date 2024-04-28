@@ -16,3 +16,11 @@ func TestAppSetupToolBar(t *testing.T) {
 		t.Error("wrong number of items in toolbar")
 	}
 }
+
+func TestAppGetHoldingSlice(t *testing.T) {
+	slice := testMainWindow.getHoldingSlice()
+
+	if len(slice) != 3 {
+		t.Error("wrong number of rows, expected 3 but got", len(slice))
+	}
+}

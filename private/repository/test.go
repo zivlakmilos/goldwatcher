@@ -18,6 +18,21 @@ func (t *TestRepository) InsertHolding(h Holdings) (*Holdings, error) {
 
 func (t *TestRepository) AllHoldings() ([]Holdings, error) {
 	var all []Holdings
+
+	h := Holdings{
+		Id:            1,
+		PurchaseDate:  time.Now(),
+		PurchasePrice: 1000,
+	}
+	all = append(all, h)
+
+	h = Holdings{
+		Id:            1,
+		PurchaseDate:  time.Now(),
+		PurchasePrice: 2000,
+	}
+	all = append(all, h)
+
 	return all, nil
 }
 
