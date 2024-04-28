@@ -4,7 +4,7 @@ VERSION=1.0.1
 BUILD_NO=2
 
 build:
-	rm -rf bin/
+	rm -rf bin/*
 	fyne package -appVersion ${VERSIO} -appBuild ${BUILD_NO} -name ${APP_NAME} --src ./cmd/goldwatcher/main.go -release
 
 run:
@@ -13,7 +13,7 @@ run:
 clean:
 	@echo "Cleaning..."
 	@go clean
-	@rm -rf bin/
+	@rm -rf bin/*
 	@echo "Cleaned!"
 
 test:
