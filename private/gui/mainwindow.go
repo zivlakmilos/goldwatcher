@@ -37,6 +37,10 @@ type MainWindow struct {
 	db                  repository.Repository
 	holdings            [][]interface{}
 	holdingsTable       *widget.Table
+
+	addHoldingsPurchaseAmountEntry *widget.Entry
+	addHoldingsPurchaseDateEntry   *widget.Entry
+	addHoldingsPurchasePriceEntry  *widget.Entry
 }
 
 func NewMainWindow(app fyne.App, repo repository.Repository) *MainWindow {
@@ -128,7 +132,9 @@ func (w *MainWindow) getPriceText() (*canvas.Text, *canvas.Text, *canvas.Text) {
 func (w *MainWindow) setupToolBar() *widget.Toolbar {
 	toolBar := widget.NewToolbar(
 		widget.NewToolbarSpacer(),
-		widget.NewToolbarAction(theme.DocumentCreateIcon(), func() {}),
+		widget.NewToolbarAction(theme.DocumentCreateIcon(), func() {
+			w.addHoldingsDialog()
+		}),
 		widget.NewToolbarAction(theme.ViewRefreshIcon(), func() {
 			w.refreshPriceContent()
 		}),
@@ -282,7 +288,7 @@ func (w *MainWindow) getHoldingSlice() [][]interface{} {
 
 		row = append(row, fmt.Sprintf("%d", x.Id))
 		row = append(row, fmt.Sprintf("%d toz", x.Amount))
-		row = append(row, fmt.Sprintf("$%.2f", float32(x.PurchasePrice/100)))
+		row = append(row, fmt.Sprintf("$%.2f", float32(x.PurchasePrice)/100.0))
 		row = append(row, x.PurchaseDate.Format("2006-01-02"))
 		row = append(row, widget.NewButton("Delete", func() {}))
 
@@ -295,4 +301,81 @@ func (w *MainWindow) getHoldingSlice() [][]interface{} {
 func (w *MainWindow) refreshHoldingsTable() {
 	w.holdings = w.getHoldingSlice()
 	w.holdingsTable.Refresh()
+}
+
+func (w *MainWindow) addHoldingsDialog() dialog.Dialog {
+	addAmountEntry := widget.NewEntry()
+	purchaseDateEntry := widget.NewEntry()
+	purchasePriceEntry := widget.NewEntry()
+
+	w.addHoldingsPurchaseAmountEntry = addAmountEntry
+	w.addHoldingsPurchaseDateEntry = purchaseDateEntry
+	w.addHoldingsPurchasePriceEntry = purchasePriceEntry
+
+	dateValidator := func(s string) error {
+		if _, err := time.Parse("2006-01-02", s); err != nil {
+			return err
+		}
+
+		return nil
+	}
+	purchaseDateEntry.Validator = dateValidator
+
+	isIntValidator := func(s string) error {
+		if _, err := strconv.Atoi(s); err != nil {
+			return err
+		}
+
+		return nil
+	}
+	addAmountEntry.Validator = isIntValidator
+
+	isFloatValidator := func(s string) error {
+		if _, err := strconv.ParseFloat(s, 32); err != nil {
+			return err
+		}
+
+		return nil
+	}
+	purchasePriceEntry.Validator = isFloatValidator
+
+	purchaseDateEntry.PlaceHolder = "YYYY-MM-DD"
+
+	addForm := dialog.NewForm(
+		"Add Gold",
+		"Add",
+		"Cancel",
+		[]*widget.FormItem{
+			{Text: "Amount in toz", Widget: addAmountEntry},
+			{Text: "Purchase Price", Widget: purchasePriceEntry},
+			{Text: "Purchase Date", Widget: purchaseDateEntry},
+		},
+		func(valid bool) {
+			if !valid {
+				return
+			}
+
+			amount, _ := strconv.Atoi(addAmountEntry.Text)
+			purchaseDate, _ := time.Parse("2006-01-02", purchaseDateEntry.Text)
+			purchasePrice, _ := strconv.ParseFloat(purchasePriceEntry.Text, 32)
+			purchasePrice *= 100
+
+			_, err := w.db.InsertHolding(repository.Holdings{
+				Amount:        amount,
+				PurchaseDate:  purchaseDate,
+				PurchasePrice: int(purchasePrice),
+			})
+			if err != nil {
+				w.errorLog.Println(err)
+			}
+
+			w.refreshHoldingsTable()
+		},
+		w.win,
+	)
+
+	addForm.Resize(fyne.NewSize(400, 0))
+	addForm.Show()
+
+	return addForm
 }
