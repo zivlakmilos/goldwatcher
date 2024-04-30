@@ -1,6 +1,10 @@
 package gui
 
-import "testing"
+import (
+	"testing"
+
+	"fyne.io/fyne/v2/test"
+)
 
 func TestAppGetPriceText(t *testing.T) {
 	open, _, _ := testMainWindow.getPriceText()
@@ -22,5 +26,25 @@ func TestAppGetHoldingSlice(t *testing.T) {
 
 	if len(slice) != 3 {
 		t.Error("wrong number of rows, expected 3 but got", len(slice))
+	}
+}
+
+func TestAddHoldingsDialog(t *testing.T) {
+	testMainWindow.addHoldingsDialog()
+
+	test.Type(testMainWindow.addHoldingsPurchaseAmountEntry, "1")
+	test.Type(testMainWindow.addHoldingsPurchasePriceEntry, "1000")
+	test.Type(testMainWindow.addHoldingsPurchaseDateEntry, "2024-04-30")
+
+	if testMainWindow.addHoldingsPurchaseDateEntry.Text != "2024-04-30" {
+		t.Error("date not correct")
+	}
+
+	if testMainWindow.addHoldingsPurchaseAmountEntry.Text != "1" {
+		t.Error("amount not correct")
+	}
+
+	if testMainWindow.addHoldingsPurchasePriceEntry.Text != "1000" {
+		t.Error("price not correct")
 	}
 }
