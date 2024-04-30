@@ -210,7 +210,12 @@ func (w *MainWindow) refreshPriceContent() {
 func (w *MainWindow) setupHoldingsTab() *fyne.Container {
 	w.holdingsTable = w.getHoldingsTable()
 
-	holdingsContainer := container.NewVBox(w.holdingsTable)
+	holdingsContainer := container.NewBorder(
+		nil,
+		nil,
+		nil,
+		nil,
+		container.NewAdaptiveGrid(1, w.holdingsTable))
 
 	return holdingsContainer
 }
@@ -275,7 +280,7 @@ func (w *MainWindow) getHoldingSlice() [][]interface{} {
 
 		row = append(row, fmt.Sprintf("%d", x.Id))
 		row = append(row, fmt.Sprintf("%d toz", x.Amount))
-		row = append(row, fmt.Sprintf("$%2f", float32(x.PurchasePrice/100)))
+		row = append(row, fmt.Sprintf("$%.2f", float32(x.PurchasePrice/100)))
 		row = append(row, x.PurchaseDate.Format("2006-01-02"))
 		row = append(row, widget.NewButton("Delete", func() {}))
 
