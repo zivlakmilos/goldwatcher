@@ -208,6 +208,7 @@ func (w *MainWindow) refreshPriceContent() {
 }
 
 func (w *MainWindow) setupHoldingsTab() *fyne.Container {
+	w.holdings = w.getHoldingSlice()
 	w.holdingsTable = w.getHoldingsTable()
 
 	holdingsContainer := container.NewBorder(
@@ -221,21 +222,22 @@ func (w *MainWindow) setupHoldingsTab() *fyne.Container {
 }
 
 func (w *MainWindow) getHoldingsTable() *widget.Table {
-	data := w.getHoldingSlice()
-	w.holdings = data
-
 	t := widget.NewTable(func() (int, int) {
-		return len(data), len(data[0])
+		return len(w.holdings), len(w.holdings[0])
 	},
 		func() fyne.CanvasObject {
 			ctr := container.NewVBox(widget.NewLabel(""))
 			return ctr
 		},
 		func(i widget.TableCellID, o fyne.CanvasObject) {
-			if i.Col == len(data[0])-1 && i.Row != 0 {
+			if i.Col == len(w.holdings[0])-1 && i.Row != 0 {
 				w := widget.NewButtonWithIcon("Delete", theme.DeleteIcon(), func() {
 					dialog.ShowConfirm("Delete?", "", func(deleted bool) {
-						id, _ := strconv.Atoi(data[i.Row][0].(string))
+						if !deleted {
+							return
+						}
+
+						id, _ := strconv.Atoi(w.holdings[i.Row][0].(string))
 						err := w.db.DeleteHolding(int64(id))
 						if err != nil {
 							w.errorLog.Println(err)
@@ -252,7 +254,7 @@ func (w *MainWindow) getHoldingsTable() *widget.Table {
 				}
 			} else {
 				o.(*fyne.Container).Objects = []fyne.CanvasObject{
-					widget.NewLabel((data[i.Row][i.Col]).(string)),
+					widget.NewLabel((w.holdings[i.Row][i.Col]).(string)),
 				}
 			}
 		})
