@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"fyne.io/fyne/v2"
 )
 
 var Currency = "USD"
@@ -57,4 +59,8 @@ func (g *Gold) GetPrices() (*Price, error) {
 
 	price := gold.Prices[0]
 	return &price, nil
+}
+
+func LoadCurrency(app fyne.App) {
+	Currency = app.Preferences().StringWithFallback("currency", "USD")
 }
