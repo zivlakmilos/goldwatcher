@@ -138,7 +138,11 @@ func (w *MainWindow) setupToolBar() *widget.Toolbar {
 		widget.NewToolbarAction(theme.ViewRefreshIcon(), func() {
 			w.refreshPriceContent()
 		}),
-		widget.NewToolbarAction(theme.SettingsIcon(), func() {}),
+		widget.NewToolbarAction(theme.SettingsIcon(), func() {
+			win := w.showPreferences()
+			win.Resize(fyne.NewSize(300, 200))
+			win.Show()
+		}),
 	)
 
 	return toolBar
@@ -378,4 +382,25 @@ func (w *MainWindow) addHoldingsDialog() dialog.Dialog {
 	addForm.Show()
 
 	return addForm
+}
+
+func (w *MainWindow) showPreferences() fyne.Window {
+	win := w.app.NewWindow("Preferences")
+
+	lbl := widget.NewLabel("Preferred Currency")
+	cur := widget.NewSelect([]string{"CAD", "GBP", "USD"}, func(value string) {
+		api.Currency = value
+		w.app.Preferences().SetString("currency", value)
+	})
+	cur.Selected = api.Currency
+
+	btn := widget.NewButton("Save", func() {
+		win.Close()
+		w.refreshPriceContent()
+	})
+	btn.Importance = widget.HighImportance
+
+	win.SetContent(container.NewVBox(lbl, cur, btn))
+
+	return win
 }
