@@ -1,11 +1,11 @@
 BINARY_NAME=GoldWatcher
 APP_NAME=GoldWatcher
-VERSION=1.0.1
-BUILD_NO=2
+VERSION=1.0.0
+BUILD_NO=1
 
 build:
 	rm -rf bin/*
-	fyne package -appVersion ${VERSIO} -appBuild ${BUILD_NO} -name ${APP_NAME} --src ./cmd/goldwatcher/main.go -release
+	fyne package -appVersion ${VERSION} -appBuild ${BUILD_NO} -name ${APP_NAME} --src ./cmd/goldwatcher -release
 
 run:
 	env DB_PATH="./bin/sql.db" go run ./cmd/goldwatcher/main.go

@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"github.com/zivlakmilos/goldwatcher/private/api"
 	"github.com/zivlakmilos/goldwatcher/private/gui"
 	"github.com/zivlakmilos/goldwatcher/private/repository"
 
@@ -25,6 +26,8 @@ func main() {
 	if err != nil {
 		return
 	}
+
+	api.LoadCurrency(a)
 
 	w := gui.NewMainWindow(a, repo)
 	w.Show()
