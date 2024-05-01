@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	a := app.NewWithID("ra.zivlak.goldwatcher")
+	a := app.NewWithID("rs.zivlak.goldwatcher")
 
 	db, err := connectSQL(a)
 	if err != nil {
